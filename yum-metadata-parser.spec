@@ -4,7 +4,7 @@
 #
 Name     : yum-metadata-parser
 Version  : 1.1.4
-Release  : 11
+Release  : 12
 URL      : http://yum.baseurl.org/download/yum-metadata-parser/yum-metadata-parser-1.1.4.tar.gz
 Source0  : http://yum.baseurl.org/download/yum-metadata-parser/yum-metadata-parser-1.1.4.tar.gz
 Summary  : A fast YUM meta-data parser
@@ -12,10 +12,14 @@ Group    : Development/Tools
 License  : GPL-2.0
 Requires: yum-metadata-parser-python
 BuildRequires : glib-dev
+BuildRequires : pbr
+BuildRequires : pip
 BuildRequires : pkgconfig(libxml-2.0)
 BuildRequires : pkgconfig(sqlite3)
 BuildRequires : python-dev
+BuildRequires : python3-dev
 BuildRequires : setuptools
+Patch1: 0001-Improve-yum-performance-in-Clear.patch
 
 %description
 Fast metadata parser for yum implemented in C.
@@ -30,17 +34,23 @@ python components for the yum-metadata-parser package.
 
 %prep
 %setup -q -n yum-metadata-parser-1.1.4
+%patch1 -p1
 
 %build
-%{__python} setup.py build
+export http_proxy=http://127.0.0.1:9/
+export https_proxy=http://127.0.0.1:9/
+export no_proxy=localhost,127.0.0.1,0.0.0.0
+export LANG=C
+export SOURCE_DATE_EPOCH=1493339024
+python2 setup.py build -b py2
 
 %install
 rm -rf %{buildroot}
-%{__python} setup.py install --root=%{buildroot}
+python2 -tt setup.py build -b py2 install --root=%{buildroot}
 
 %files
 %defattr(-,root,root,-)
 
 %files python
 %defattr(-,root,root,-)
-/usr/lib/python*/*
+/usr/lib/python2*/*

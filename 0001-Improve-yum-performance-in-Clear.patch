@@ -1,0 +1,29 @@
+From 6e9fd6a7288bb193ddaf4e06472d087c369ce7b7 Mon Sep 17 00:00:00 2001
+From: William Douglas <william.douglas@intel.com>
+Date: Fri, 28 Apr 2017 00:14:59 +0000
+Subject: [PATCH] Improve yum performance in Clear
+
+Clear Linux uses yum to do dependency management with the repository's
+rpm files. Through that lens, yum database corruption is not import as
+the database files are impermanent anyway and speed is the major
+priority. To make this trade off turn off the synchronous pragma when
+opening a sqlite db.
+---
+ sqlitecachec.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/sqlitecachec.py b/sqlitecachec.py
+index 8b0ca08..898a70d 100644
+--- a/sqlitecachec.py
++++ b/sqlitecachec.py
+@@ -34,6 +34,7 @@ class RepodataParserSqlite:
+             con.row_factory = sqlite.Row
+         cur = con.cursor()
+         cur.execute("pragma locking_mode = EXCLUSIVE")
++        cur.execute("pragma synchronous = OFF")
+         del cur
+         return con
+ 
+-- 
+2.12.2
+
